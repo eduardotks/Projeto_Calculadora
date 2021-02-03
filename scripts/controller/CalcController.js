@@ -79,6 +79,7 @@ class CalcController {
     //limpa
     clearAll() {
         this._operation = [];
+        this.setLastNumberToDisplay();
     }
 
     //limpa
@@ -87,10 +88,31 @@ class CalcController {
         this.setLastNumberToDisplay();
     }
 
+    //
+    calc() {
 
-    //é operador?
-    isOperator(value) {
-        return (['+', '-', '*', '%', '/'].indexOf(value) > -1);
+        if (this._operation.lenght > 3) {
+            last = this._operation.pop();
+        }
+        let last = this._operation.pop();
+        let result = eval(this._operation.join(""));
+        if (last == '%') {
+            result = result / 100; //divide por 100 se for porcentagem ou pode ser result /= 100
+            this._operation = [result];
+        }
+        else {
+
+            this._operation = [result];
+
+            if (last) this._operation.push(last);
+
+        }
+        this.setLastNumberToDisplay();
+    }
+
+    //para mensagem de erro
+    setError() {
+        this.displayCalc = "Error";
     }
 
     //insere
@@ -102,30 +124,10 @@ class CalcController {
         }
 
     }
-
-    //
-    calc() {
-        let last = this._operation.pop();
-        let result = eval(this._operation.join(""));
-        if (last == '%') {
-            result = result / 100; //divide por 100 se for porcentagem ou pode ser result /= 100
-            this._operation = [result];
-        }
-        else {
-
-            this._operation = [result, last];
-
-        }
-        this.setLastNumberToDisplay();
+    //é operador?
+    isOperator(value) {
+        return (['+', '-', '*', '%', '/'].indexOf(value) > -1);
     }
-
-    //para mensagem de erro
-    setError() {
-        this.displayCalc = "Error";
-    }
-
-
-
     getLastOperation() {
         return this._operation[this._operation.lenght - 1];
     }
@@ -133,34 +135,30 @@ class CalcController {
     setLastOperation(value) {
         this._operation[this._operation.lenght - 1] = value;
     }
-
-
-
-
-
-
     //para operações
     addOperation(value) {
 
-
         if (isNaN(this.getLastOperation())) {
-            if (this.isOperator(value)) {
+            //
+            if (this.isOperator(value)) { //é um operador?
                 this.setLastOperation(value);
             }
-            else if (isNaN(value)) {
+            //
+            else if (isNaN(value)) {   //isso não é um numero?
                 console.log('Outra coisa', value);
             }
+            //
             else {
                 this.pushOperation(value);
-                console.log(this.pushOperation);
                 this.setLastNumberToDisplay();
             }
         }
         else {
+            //
             if (this.isOperator(value)) {
                 this.pushOperation(value);
-                console.log(this.pushOperation);
             }
+            //
             else {
                 let newValue = this.getLastOperation().toString() + value.toString();
                 this.setLastOperation(parseInt(newValue));
@@ -177,34 +175,26 @@ class CalcController {
             case 'ac':
                 this.clearAll();
                 break;
-
             case 'ce':
                 this.clearEntry();
                 break;
-
             case 'soma':
                 this.addOperation('+');
                 break;
-
             case 'subtracao':
                 this.addOperation('-');
                 break;
-
             case 'divisao':
                 this.addOperation('/');
                 break;
-
             case 'multiplicacao':
                 this.addOperation('*');
                 break;
-
             case 'porcento':
                 this.addOperation('%');
                 break;
-
             case 'igual':
                 break;
-
             case 'ponto':
                 this.addOperation('.');
                 break;
@@ -232,6 +222,8 @@ class CalcController {
     //evento de escuta
     addEventListenerAll(element, events, fn) {
         events.split(' ').forEach(event => {
+            //FALSE é passado para função pois temos tanto o botão quanto o texto do botão se acontecer de clicar nos 2 pode gerar 2 informações,
+            // com false acontece 1 só vez
             element.addEventListener(event, fn, false);
         });
     }
@@ -241,11 +233,12 @@ class CalcController {
         let buttons = document.querySelectorAll("#buttons > g, #parts > g");
 
 
-        buttons.forEach((btn, index) => {
+        buttons.forEach((btn, index)=>{
             this.addEventListenerAll(btn, "click drag", e => {
-                console.log(btn.className.baseVal.replace("btn-", "")); //substitui o btn- por vazio
+                
+                let textBtn = btn.className.baseVal.replace("btn-", ""); //substitui o btn- por vazio
 
-                this.execBtn();
+                this.execBtn(textBtn);
             });
             this.addEventListenerAll(btn, "mouseover mouseup mousedown", e => {
                 btn.style.cursor = "pointer";
