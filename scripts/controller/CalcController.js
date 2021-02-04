@@ -16,6 +16,7 @@ class CalcController {
         this._currentDate;
         this.initialize();
         this.initButtonsEvents();
+        this.initKeyboard();
     }
 
     //set hora tempo
@@ -78,8 +79,7 @@ class CalcController {
             }
         }
 
-        if(!lastItem)
-        {
+        if (!lastItem) {
             lastItem = (isOperator) ? this._lastOperator : this._lastNumber; //if ternário então e se não
         }
         return lastItem;
@@ -120,8 +120,7 @@ class CalcController {
         this._lastOperator = this.getLastItem(); //como padrão o parâmetro é true vai guardar o operador.
 
         //se tiver menos de 3 itens
-        if(this._operation.length < 3)
-        {
+        if (this._operation.length < 3) {
             let firstItem = this._operation[0];
             this._operation = [firstItem, this._lastOperator, this._lastNumber]; //3 itens para realizar operação
         }
@@ -205,22 +204,27 @@ class CalcController {
             //
             else {
                 let newValue = this.getLastOperation().toString() + value.toString(); //concatena string dos números.
-                this.setLastOperation(parseFloat(newValue));
+                this.setLastOperation(newValue);
                 this.setLastNumberToDisplay();
             }
         }
     }
 
-    addDot()
-    {
+    addDot() {
         let lastOperation = this.getLastOperation();
 
-        if(this.isOperator(lastOperation) || !lastOperation) //se uma das duas cond forem verdade então
+        //verificar se existe e se o ponto já existe
+        //split só é realizado se for string
+        //é uma string e tem um ponto? se sim faz um return e para a operação
+        if (typeof lastOperation === 'string' && lastOperation.split('').indexOf('.') > -1) {
+            return;
+        }
+
+        if (this.isOperator(lastOperation) || !lastOperation) //se uma das duas cond forem verdade então
         {
             this.pushOperation('0.') //add um novo item na operação
         }
-        else
-        {
+        else {
             this.setLastOperation(lastOperation.toString() + '.'); //para não perder a última operação uso o método set last operation e concateno com ponto
         }
 
@@ -276,6 +280,48 @@ class CalcController {
         }
     }
 
+    //captura teclado
+    initKeyboard() {
+        document.addEventListener('keyup', e => {
+
+            switch (e.key) { //'e' é o evento e key é a propriedade
+                case 'Escape':
+                    this.clearAll();
+                    break;
+                case 'Backspace':
+                    this.clearEntry();
+                    break;
+                case '+':
+                case '-':
+                case '/':
+                case '*':
+                case '%':
+                    this.addOperation(e.key);
+                    break;
+                case 'Enter':
+                case '=':
+                    this.calc();
+                    break;
+                case '.':
+                case ',':
+                    this.addDot();
+                    break;
+
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    this.addOperation(parseInt(e.key)); //add valor
+                    break;
+            }
+        });
+    }
 
     //evento de escuta
     addEventListenerAll(element, events, fn) {
