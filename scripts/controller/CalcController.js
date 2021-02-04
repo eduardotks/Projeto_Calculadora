@@ -167,7 +167,18 @@ class CalcController {
 
     //
     getResult() {
-        return eval(this._operation.join(""));
+        try 
+        {
+            return eval(this._operation.join(""));
+        }
+        catch (e) 
+        {
+            setTimeout(()=>{
+                this.setError();
+            },1); //1 milisegundo
+
+        }
+
     }
     //
     calc() {
@@ -213,7 +224,7 @@ class CalcController {
 
     //para mensagem de erro
     setError() {
-        this.displayCalc = "Error";
+        this.displayCalc = "ERRO";
     }
 
     //insere
