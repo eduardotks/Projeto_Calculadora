@@ -29,6 +29,31 @@ class CalcController {
         });
         this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
     }
+    //ctrl v
+    pasteFromClipboard() {
+        document.addEventListener('paste', e => {
+            let text = e.clipboardData.getData('Text');//formato que não seja imagem ou binário, apenas text
+
+            this.displayCalc = parseFloat(text);
+            console.log(text);
+        });
+    }
+
+
+    //ctrl c ctrl v
+    copyToClipboard() {
+        let input = document.createElement('input'); //cria elementos na tela dinamicamente
+
+        input.value = this.displayCalc; //coloca dentro do value displaycalc
+
+        document.body.appendChild(input);
+        input.select();
+
+        document.execCommand("Copy");
+
+        input.remove(); //remove o input
+
+    }
 
     //inicialização, quando inicializar a calculadora executa as seguintes info.
     initialize() {
@@ -39,6 +64,7 @@ class CalcController {
         }, 1000);
 
         this.setLastNumberToDisplay(); //iniciar calculadora com zero.
+        this.pasteFromClipboard();
     }
 
     get displayCalc() {
@@ -318,6 +344,10 @@ class CalcController {
                 case '8':
                 case '9':
                     this.addOperation(parseInt(e.key)); //add valor
+                    break;
+
+                case 'c':
+                    if (e.ctrlKey) this.copyToClipboard();
                     break;
             }
         });
