@@ -6,6 +6,8 @@ class CalcController {
 
     //contrutor
     constructor() {
+        this._audio = new Audio('click.mp3');
+        this._audioOnOff = false;
         this._lastOperator = '';
         this._lastNumber = '';
         this._operation = [];
@@ -65,12 +67,40 @@ class CalcController {
 
         this.setLastNumberToDisplay(); //iniciar calculadora com zero.
         this.pasteFromClipboard();
+
+        //para áudio da calc
+        document.querySelectorAll('.btn-ac').forEach(btn => {
+            btn.addEventListener('dblclick', e => {
+                this.toggleAudio();
+            });
+        });
     }
 
+    toggleAudio() {
+        this._audioOnOff = !this._audioOnOff;
+
+    }
+
+    playAudio() {
+        //se pode tocar
+        if (this._audioOnOff) {
+
+            this._audio.currentTime = 0;
+            this._audio.play();
+
+        }
+    }
     get displayCalc() {
         return this._displayCalcEl.innerHTML;
     }
     set displayCalc(value) {
+
+        //limite de quantidade de char na tela
+        if (value.toString().length > 10) {
+            this.setError();
+            return false;
+        }
+
         this._displayCalcEl.innerHTML = value;
     }
     get displayTime() {
@@ -159,10 +189,11 @@ class CalcController {
 
             this._lastNumber = this.getLastItem(false); //guardar o último núm
         }
-
+        /*
         console.log('this._lastOperator', this._lastOperator);
 
         console.log('this._lastNumber', this._lastNumber);
+        */
         let result = this.getResult(); //resultado do botão 
 
         if (last == '%') //Se o elemento for % exec a operação.
@@ -258,6 +289,9 @@ class CalcController {
     }
 
     execBtn(value) {
+
+        this.playAudio(); //toca audio
+
         switch (value) {
             case 'ac':
                 this.clearAll();
@@ -309,6 +343,7 @@ class CalcController {
     //captura teclado
     initKeyboard() {
         document.addEventListener('keyup', e => {
+            this.playAudio();//toca áudio
 
             switch (e.key) { //'e' é o evento e key é a propriedade
                 case 'Escape':
