@@ -98,6 +98,8 @@ class CalcController {
     //limpa
     clearAll() {
         this._operation = [];
+        this._lastNumber = '';
+        this._lastOperator = '';
         this.setLastNumberToDisplay();
     }
 
@@ -203,10 +205,26 @@ class CalcController {
             //
             else {
                 let newValue = this.getLastOperation().toString() + value.toString(); //concatena string dos números.
-                this.setLastOperation(parseInt(newValue));
+                this.setLastOperation(parseFloat(newValue));
                 this.setLastNumberToDisplay();
             }
         }
+    }
+
+    addDot()
+    {
+        let lastOperation = this.getLastOperation();
+
+        if(this.isOperator(lastOperation) || !lastOperation) //se uma das duas cond forem verdade então
+        {
+            this.pushOperation('0.') //add um novo item na operação
+        }
+        else
+        {
+            this.setLastOperation(lastOperation.toString() + '.'); //para não perder a última operação uso o método set last operation e concateno com ponto
+        }
+
+        this.setLastNumberToDisplay(); //coloca na tela
     }
 
     execBtn(value) {
@@ -236,7 +254,7 @@ class CalcController {
                 this.calc();
                 break;
             case 'ponto':
-                this.addOperation('.');
+                this.addDot('.');
                 break;
 
             case '0':
