@@ -6,6 +6,8 @@ class CalcController {
 
     //contrutor
     constructor() {
+        this._lastOperator = '';
+        this._lastNumber = '';
         this._operation = [];
         this._locale = 'pt-BR';
         this._displayCalcEl = document.querySelector("#display");
@@ -63,18 +65,31 @@ class CalcController {
         this._currentDate = value;
     }
 
+    getLastItem(isOperator = true) //por padrão trás o último operador
+    {
+        let lastItem;
 
-
-    //Guarda o último número
-    setLastNumberToDisplay() {
-        let lastNumber;
 
         for (let i = this._operation.length - 1; i >= 0; i--) {
-            if (!this.isOperator(this._operation[i])) {
-                lastNumber = this._operation[i]; //coloca num na variável
+
+            if (this.isOperator(this._operation[i]) == isOperator) {
+                lastItem = this._operation[i]; //coloca num na variável
                 break; //se encontrou para o for
             }
         }
+
+        if(!lastItem)
+        {
+            lastItem = (isOperator) ? this._lastOperator : this._lastNumber; //if ternário então e se não
+        }
+        return lastItem;
+    }
+
+    //Guarda o último número
+    setLastNumberToDisplay() {
+        let lastNumber = this.getLastItem(false); //false pois quero um número
+
+
         if (!lastNumber) lastNumber = 0; //array é vazio ? então coloca zero
 
         this.displayCalc = lastNumber;
@@ -93,15 +108,36 @@ class CalcController {
     }
 
     //
+    getResult() {
+        return eval(this._operation.join(""));
+    }
+    //
     calc() {
         let last = '';
 
-        if (this._operation.length > 3) {
-            last = this._operation.pop(); //tira o último se for maior que 3 itens.
+        this._lastOperator = this.getLastItem(); //como padrão o parâmetro é true vai guardar o operador.
+
+        //se tiver menos de 3 itens
+        if(this._operation.length < 3)
+        {
+            let firstItem = this._operation[0];
+            this._operation = [firstItem, this._lastOperator, this._lastNumber]; //3 itens para realizar operação
         }
 
+        if (this._operation.length > 3) {
+            last = this._operation.pop(); //tira o último se for maior que 3 itens.
+            this._lastNumber = this.getResult(); //resultado do botão igual.
 
-        let result = eval(this._operation.join(""));
+        } else if (this._operation.length == 3) {
+
+            this._lastNumber = this.getLastItem(false); //guardar o último núm
+        }
+
+        console.log('this._lastOperator', this._lastOperator);
+
+        console.log('this._lastNumber', this._lastNumber);
+        let result = this.getResult(); //resultado do botão 
+
         if (last == '%') //Se o elemento for % exec a operação.
         {
             result /= 100;  //ou result = result / 100
@@ -111,8 +147,7 @@ class CalcController {
             //resultado desse eval sera enviado para o novo array
             this._operation = [result];
 
-            if(last) this._operation.push(last); //se last for diferente de vazio , executa o push, add só se existir.
-
+            if (last) this._operation.push(last); //se last for diferente de vazio , executa o push, add só se existir.
         }
 
         this.setLastNumberToDisplay();
@@ -148,17 +183,11 @@ class CalcController {
     //para operações
     addOperation(value) {
         //OBS: se for um número é necessário concatenar
-
-        console.log('a', isNaN(this.getLastOperation()));
         //o último número não é numérico ou é sinal ou ponto, se for número cai no else;
         if (isNaN(this.getLastOperation())) {
             //
             if (this.isOperator(value)) { //o valor atual é um operador?
                 this.setLastOperation(value); //se for um operador troca para o outro operador.
-
-            }
-            else if (isNaN(value)) {   //isso não é um numero?
-                console.log('Outra coisa', value);
 
             }
             else {
@@ -177,13 +206,8 @@ class CalcController {
                 this.setLastOperation(parseInt(newValue));
                 this.setLastNumberToDisplay();
             }
-
-            console.log(this._operation);
         }
     }
-
-
-
 
     execBtn(value) {
         switch (value) {
@@ -247,7 +271,6 @@ class CalcController {
     initButtonsEvents() {
         //querySelectorAll seleciona todos aqueles que casam com essa consulta que estou fazendo.
         let buttons = document.querySelectorAll("#buttons > g, #parts > g");
-
 
         buttons.forEach((btn, index) => {
             this.addEventListenerAll(btn, "click drag", e => {
