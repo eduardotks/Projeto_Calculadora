@@ -34,6 +34,8 @@ class CalcController {
         setInterval(() => {
             this.setDisplayDateTime();
         }, 1000);
+
+        this.setLastNumberToDisplay(); //iniciar calculadora com zero.
     }
 
     get displayCalc() {
@@ -73,13 +75,15 @@ class CalcController {
                 break; //se encontrou para o for
             }
         }
+        if (!lastNumber) lastNumber = 0; //array é vazio ? então coloca zero
+
         this.displayCalc = lastNumber;
     }
 
     //limpa
     clearAll() {
         this._operation = [];
-
+        this.setLastNumberToDisplay();
     }
 
     //limpa
@@ -90,25 +94,27 @@ class CalcController {
 
     //
     calc() {
-        let last = this._operation.pop(); //tira o último 
+        let last = '';
 
-        if (this._operation.length > 3) 
-        {
-            last = this._operation.pop(); //
+        if (this._operation.length > 3) {
+            last = this._operation.pop(); //tira o último se for maior que 3 itens.
         }
 
-        let result = eval(this._operation.join("")); //resultado desse eval sera enviado para o novo array
-        if (last == '%') {
-            result = result / 100; //divide por 100 se for porcentagem ou pode ser result /= 100
+
+        let result = eval(this._operation.join(""));
+        if (last == '%') //Se o elemento for % exec a operação.
+        {
+            result /= 100;  //ou result = result / 100
             this._operation = [result];
         }
         else {
-
+            //resultado desse eval sera enviado para o novo array
             this._operation = [result];
 
-            if (last) this._operation.push(last);
+            if(last) this._operation.push(last); //se last for diferente de vazio , executa o push, add só se existir.
 
         }
+
         this.setLastNumberToDisplay();
     }
 
@@ -203,6 +209,7 @@ class CalcController {
                 this.addOperation('%');
                 break;
             case 'igual':
+                this.calc();
                 break;
             case 'ponto':
                 this.addOperation('.');
