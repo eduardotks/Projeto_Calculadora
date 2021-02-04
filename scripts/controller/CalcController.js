@@ -67,10 +67,10 @@ class CalcController {
     setLastNumberToDisplay() {
         let lastNumber;
 
-        for (let i = this._operation.lenght - 1; i >= 0; i--) {
+        for (let i = this._operation.length - 1; i >= 0; i--) {
             if (!this.isOperator(this._operation[i])) {
-                lastNumber = this._operation[i];
-                break;
+                lastNumber = this._operation[i]; //coloca num na variável
+                break; //se encontrou para o for
             }
         }
         this.displayCalc = lastNumber;
@@ -79,7 +79,7 @@ class CalcController {
     //limpa
     clearAll() {
         this._operation = [];
-        this.setLastNumberToDisplay();
+
     }
 
     //limpa
@@ -90,12 +90,14 @@ class CalcController {
 
     //
     calc() {
+        let last = this._operation.pop(); //tira o último 
 
-        if (this._operation.lenght > 3) {
-            last = this._operation.pop();
+        if (this._operation.length > 3) 
+        {
+            last = this._operation.pop(); //
         }
-        let last = this._operation.pop();
-        let result = eval(this._operation.join(""));
+
+        let result = eval(this._operation.join("")); //resultado desse eval sera enviado para o novo array
         if (last == '%') {
             result = result / 100; //divide por 100 se for porcentagem ou pode ser result /= 100
             this._operation = [result];
@@ -119,51 +121,58 @@ class CalcController {
     pushOperation(value) {
         this._operation.push(value);
 
-        if (this._operation.lenght > 3) {
+        if (this._operation.length > 3) {
             this.calc();
         }
 
     }
     //é operador?
     isOperator(value) {
-        return (['+', '-', '*', '%', '/'].indexOf(value) > -1);
-    }
-    getLastOperation() {
-        return this._operation[this._operation.lenght - 1];
+        return (['+', '-', '*', '%', '/'].indexOf(value) > -1); //indexOf é maior que -1? compara se o valor está no array de sinais, se sim conta qtd.
     }
 
+    //Pega ultima operação realizada
+    getLastOperation() {
+        return this._operation[this._operation.length - 1];
+    }
+    //guarda informação enviada
     setLastOperation(value) {
-        this._operation[this._operation.lenght - 1] = value;
+        this._operation[this._operation.length - 1] = value;
     }
     //para operações
     addOperation(value) {
+        //OBS: se for um número é necessário concatenar
 
+        console.log('a', isNaN(this.getLastOperation()));
+        //o último número não é numérico ou é sinal ou ponto, se for número cai no else;
         if (isNaN(this.getLastOperation())) {
             //
-            if (this.isOperator(value)) { //é um operador?
-                this.setLastOperation(value);
+            if (this.isOperator(value)) { //o valor atual é um operador?
+                this.setLastOperation(value); //se for um operador troca para o outro operador.
+
             }
-            //
             else if (isNaN(value)) {   //isso não é um numero?
                 console.log('Outra coisa', value);
+
             }
-            //
             else {
                 this.pushOperation(value);
                 this.setLastNumberToDisplay();
             }
         }
         else {
-            //
+            //Se for operador só add ao array
             if (this.isOperator(value)) {
                 this.pushOperation(value);
             }
             //
             else {
-                let newValue = this.getLastOperation().toString() + value.toString();
+                let newValue = this.getLastOperation().toString() + value.toString(); //concatena string dos números.
                 this.setLastOperation(parseInt(newValue));
                 this.setLastNumberToDisplay();
             }
+
+            console.log(this._operation);
         }
     }
 
@@ -233,9 +242,9 @@ class CalcController {
         let buttons = document.querySelectorAll("#buttons > g, #parts > g");
 
 
-        buttons.forEach((btn, index)=>{
+        buttons.forEach((btn, index) => {
             this.addEventListenerAll(btn, "click drag", e => {
-                
+
                 let textBtn = btn.className.baseVal.replace("btn-", ""); //substitui o btn- por vazio
 
                 this.execBtn(textBtn);
